@@ -1,28 +1,30 @@
-import { Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne, OneToMany} from "typeorm"
-import {DetailOrder, Supplier, OrderType} from 'src/index';
+import { Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne, OneToMany, ManyToMany, JoinTable} from "typeorm"
+import {Authorization, Affectation, Billing, DetailOrder, Supplier} from 'src/index';
 
+export enum OrderType {
+    purchase = "compra",
+    service = "servicio",
+}
 @Entity()
 export class Order {
 
     @PrimaryGeneratedColumn()
     id: number;
 
-    //TipoOrden
-    @ManyToOne(
-        () => OrderType,
-        (orderType) => orderType.orders,
-        { eager: true }
-    )
-    @JoinColumn({ name: 'id_order_type' })
-    order_type: OrderType;
+    @ManyToMany(() => Authorization, (authorization) => authorization.orders)
+    @JoinTable({
+        name: 'order_authorization', // Nombre de la tabla intermedia
+        joinColumn: { name: 'order_id', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'authorization_id', referencedColumnName: 'id' },
+    })
+    authorizations: Authorization[];
 
-    //Proveedor
     @ManyToOne(
         () => Supplier,
         (supplier) => supplier.orders,
-        { eager: true }
+        {eager: true, onUpdate: 'CASCADE' }
     )
-    @JoinColumn({ name: 'id_supplier' })
+    @JoinColumn({ name: 'supplier_id' })
     supplier: Supplier;
 
     @OneToMany(
@@ -32,8 +34,30 @@ export class Order {
     )
     details: DetailOrder[];
 
-    @Column('numeric')
-    number_order: number;
+    @OneToMany(
+        () => Billing,
+        (billing) => billing.order,
+        {cascade: true}
+    )
+    billings: Billing[];
+
+    @OneToMany(
+        () => Affectation, 
+        (affectation) => affectation.order, 
+        { cascade: true }
+    )
+    affectations: Affectation[];
+
+    //2 types of order
+    @Column({
+        type: "enum",
+        enum: OrderType,
+        default: OrderType.purchase, //default purchase
+    })
+    order_type: OrderType;
+
+    @Column({ type: 'varchar', length: 10, unique: true, nullable: false })
+    order_number: string;
 
     @Column({ type: 'date' })
     date_issued: Date;
@@ -41,26 +65,49 @@ export class Order {
     @Column({ type: 'text' })
     concept: string;
 
-    @Column({ type: 'text' })
-    conditions: string;
+    @Column({type:'varchar', length: 100 })
+    contract_number: string;
+
+    @Column({ type: 'varchar', length: 10, default: 'SOLES'})
+    coin: string;
 
     @Column('float', {
-        default: 0.00
+        default: 0
     })
     subtotal: number;
 
     @Column('float', {
-        default: 0.00
+        default: 0
     })
     igv: number;
 
     @Column('float', {
-        default: 0.00
+        default: 0
+    })
+    total:number;
+
+    @Column('float', {
+        default: 0
     })
     withholding_taxes: number;
 
     @Column('float', {
-        default: 0.00
+        default: 0
     })
     net_value: number;
+
+    @Column({ type: 'varchar', length: 30, nullable: true })
+    warehouse?: string;
+
+    @Column({ type: 'text', nullable: true })
+    conditions?: string;
+
+    @Column({ type: 'varchar', length: 50, nullable: true} )
+    workplace?: string;
+
+    @Column({ type: 'text', nullable: true})
+    deadline?: string;
+
+    @Column({ type: 'varchar', length: 50, nullable: true} )
+    payment?: string;
 }

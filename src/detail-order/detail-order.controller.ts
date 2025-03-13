@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DetailOrderService  } from './detail-order.service';
 import { CreateDetailOrderDto } from './dto/create-order-detail.dto';
 import { UpdateDetailOrderDto } from './dto/update-order-detail.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
-@Controller('detalle-orden')
+@Controller('detail-order')
 export class DetailOrderController {
   constructor(private readonly detailOrderService: DetailOrderService ) {}
 
@@ -13,8 +14,8 @@ export class DetailOrderController {
   }
 
   @Get()
-  findAll() {
-    return this.detailOrderService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.detailOrderService.findAll(paginationDto);
   }
 
   @Get(':id')

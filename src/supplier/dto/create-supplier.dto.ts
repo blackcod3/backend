@@ -16,9 +16,10 @@ export class CreateSupplierDto {
 
     @IsString()
     @MinLength(11)
-    ruc: string;
+    @IsOptional()
+    ruc?: string;
 
     @IsString()
-    @MinLength(1)
-    bank_account: string;
+    @IsOptional()
+    bank_account?: string;
 }

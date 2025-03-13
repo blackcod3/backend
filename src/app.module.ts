@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {OrderModule, SupplierModule, DetailOrderModule, OrderTypeModule } from 'src/b-module';
-import {OrderType, Order, Supplier, DetailOrder} from 'src/index'
+import {OrderModule, SupplierModule, DetailOrderModule,CommonModule, 
+        BillingModule, AffectationModule, InventoryModule, AuthorizationModule, 
+        ResponsibleAdministrationModule, ResponsibleLogisticsModule, ResponsibleSuppliersModule} from 'src/b-module';
+import {Order, Supplier, DetailOrder, Billing, Affectation, Inventory, Authorization, 
+  ResponsibleAdministration, ResponsibleLogistic, ResponsibleSupplier } from 'src/index';
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -16,17 +20,31 @@ import {OrderType, Order, Supplier, DetailOrder} from 'src/index'
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true, 
       synchronize: true, 
-      entities: [Order, OrderType, Supplier, DetailOrder],
+      entities: [Order,Supplier, DetailOrder, Billing, Affectation, 
+                Inventory, Authorization, ResponsibleAdministration,
+                ResponsibleLogistic, ResponsibleSupplier ],
     }),
+    CommonModule,
 
     OrderModule,
 
     SupplierModule,
 
-    OrderTypeModule,
-
     DetailOrderModule,
-  ],
 
+    BillingModule,
+
+    AffectationModule,
+
+    InventoryModule,
+
+    AuthorizationModule,
+
+    ResponsibleAdministrationModule,
+
+    ResponsibleLogisticsModule,
+
+    ResponsibleSuppliersModule,
+  ],
 })
 export class AppModule {}

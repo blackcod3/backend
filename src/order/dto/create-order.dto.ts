@@ -1,23 +1,21 @@
-import { IsDateString, IsNumber, IsPositive, IsString, MinLength } from "class-validator";
-
+import { IsEnum ,IsDateString, IsNumber, IsPositive, IsString, MinLength, IsOptional, IsArray } from "class-validator";
+import { OrderType } from "../entities/order.entity";
 export class CreateOrderDto {
-    //FK`S
-    @IsNumber()
-    @IsPositive()
-    id: number;
 
     @IsNumber()
     @IsPositive()
-    id_supplier: number;
+    supplier_id: number;
 
-    @IsNumber()
-    @IsPositive()
-    id_order_type: number;
+    @IsArray()
+    @IsNumber({}, { each: true }) 
+    authorization_ids: number[];
 
-    
-    @IsNumber()
-    @IsPositive()
-    number_order: number;
+    @IsEnum(OrderType, { message: "El tipo de orden debe ser 'compra' o 'servicio'" })
+    order_type:OrderType;
+
+    @IsString()
+    @MinLength(1)
+    order_number: string;
 
     @IsDateString()
     date_issued: string;
@@ -28,7 +26,11 @@ export class CreateOrderDto {
 
     @IsString()
     @MinLength(1)
-    conditions: string;
+    contract_number: string;
+
+    @IsString()
+    @MinLength(1)
+    coin: string
 
     @IsNumber({ maxDecimalPlaces: 2 })
     @IsPositive()
@@ -40,9 +42,33 @@ export class CreateOrderDto {
 
     @IsNumber({ maxDecimalPlaces: 2 })
     @IsPositive()
+    total:number
+
+    @IsNumber({ maxDecimalPlaces: 2 })
+    @IsPositive()
     withholding_taxes: number;
 
     @IsNumber({ maxDecimalPlaces: 2 })
     @IsPositive()
     net_value: number;
+
+    @IsString()
+    @IsOptional()
+    warehouse?: string;
+
+    @IsString()
+    @MinLength(1)
+    conditions: string;
+
+    @IsString()
+    @IsOptional()
+    workplace?: string;
+
+    @IsString()
+    @IsOptional()
+    deadline?: string;
+
+    @IsString()
+    @IsOptional()
+    payment?: string;
 }

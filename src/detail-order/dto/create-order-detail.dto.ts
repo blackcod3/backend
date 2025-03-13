@@ -4,7 +4,7 @@ export class CreateDetailOrderDto {
 
     @IsNumber()
     @IsPositive()
-    id: number;
+    order_id: number;
 
     @IsNumber()
     @IsPositive()

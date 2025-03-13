@@ -10,27 +10,27 @@ export class DetailOrder {
     @ManyToOne(
         () => Order, 
         (order) => order.id, 
-        { onDelete: 'CASCADE' }
+        { onDelete: 'CASCADE'}
     )
-    @JoinColumn({ name: 'id_order' })
+    @JoinColumn({ name: 'order_id' })
     order: Order;
 
     @Column('int', { default: 1 })
     quantity: number;
 
-    @Column({ type: 'varchar', length: 50 })
+    @Column({ type: 'varchar', length: 30 })
     unit: string;
 
     @Column({ type: 'text' })
     description: string;
 
     @Column('float', { 
-        default: 0.00 }
+        default: 0 }
     )
     unit_price: number;
 
     @Column('float', {
-        default: 0.00 }
+        default: 0 }
     )
     total_value: number;
 }

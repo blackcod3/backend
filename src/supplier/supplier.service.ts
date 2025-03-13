@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException, InternalServerErrorException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm'
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Supplier } from 'src/index';
 
 @Injectable()
@@ -23,12 +24,31 @@ export class SupplierService {
 
       return supplier;
 
-    } catch (error) { this.logger.error(error) }
+    } catch (error) { 
+      this.logger.error(error); 
+      
+      if (error.code === '23505') throw new ConflictException('Los datos ingresados ya existen y no pueden duplicarse.');
+    
+      throw new InternalServerErrorException('Error al crear el proveedor.');
+    }
   }
 
   //find all
-  findAll() {
-    return this.supplierRepository.find({});
+  async findAll({ page = 1, limit = 10 }: PaginationDto) {
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+
+    const [data, total] = await this.supplierRepository.findAndCount({
+      skip: (pageNumber - 1) * limitNumber,
+      take: limitNumber,
+    });
+
+    return {
+      data,
+      total,
+      page: pageNumber,
+      lastPage: Math.ceil(total / limitNumber),
+    };
   }
 
   //find by id
@@ -37,7 +57,7 @@ export class SupplierService {
       where: { id: id},
     });
 
-    if(!supplier) throw new BadRequestException(`Proveedor con ID ${id} no encontrado`)
+    if(!supplier) throw new NotFoundException(`Proveedor con ID (${id}) no encontrado`);
 
     return supplier;
   }
@@ -46,10 +66,10 @@ export class SupplierService {
   async update(id: number, updateSupplierDto: UpdateSupplierDto) {
     const supplier = await this.supplierRepository.preload({
       id: id,
-      ...UpdateSupplierDto
+      ...updateSupplierDto
     });
 
-    if(!supplier) throw new NotFoundException(`Proveedor con id: ${id} no encontrada!`)
+    if(!supplier) throw new NotFoundException(`Proveedor con id: ${id} no encontrada!`);
 
     return this.supplierRepository.save(supplier);
   }
